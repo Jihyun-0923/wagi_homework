@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 목록</title>
+</head>
+<body>
+    <h1>게시글 목록</h1>
+    {% for post in posts %}
+        <h2><a href="{% url 'post:detail' post.id %}">{{ post.title }}</a></h2>
+        {% empty %}
+        <p>아직 게시글이 없습니다.</p>
+    {% endfor %}
+    <a href="{% url 'post:write' %}">새 글 작성</a>
+</body>
+</html>
