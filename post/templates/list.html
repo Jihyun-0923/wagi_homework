@@ -2,15 +2,118 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>게시글 목록</title>
+    <style>
+        body {
+            font-family: "Noto Sans KR", sans-serif;
+            background-color: #f9f9f9;
+            padding: 30px;
+        }
+
+        .list-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 0;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .btn-new, .btn-auth {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 1rem;
+            margin-left: 8px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-new:hover, .btn-auth:hover {
+            background: #45a049;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .post-item {
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .post-item a {
+            font-size: 1.2rem;
+            color: #333;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .post-item a:hover {
+            text-decoration: underline;
+        }
+
+        .meta {
+            color: #777;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .auth-form {
+            display: inline;
+        }
+    </style>
 </head>
 <body>
-    <h1>게시글 목록</h1>
-    {% for post in posts %}
-        <h2><a href="{% url 'post:detail' post.id %}">{{ post.title }}</a></h2>
+    <div class="list-container">
+        <div class="top-bar">
+            <h1>게시글 목록</h1>
+            <div>
+                {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'logout' %}" class="auth-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-auth">로그아웃</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn-auth">로그인</a>
+                    <a href="{% url 'register' %}" class="btn-auth">회원가입</a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if user.is_authenticated %}
+        <div class="action-bar">
+            <a href="{% url 'post:write' %}" class="btn-new">+ 새 글 작성</a>
+        </div>
+        {% endif %}
+
+        {% for post in posts %}
+        <div class="post-item">
+            <a href="{% url 'post:detail' post.id %}">{{ post.title }}</a>
+            <div class="meta">
+                작성자: {{ post.author }} | 작성일: {{ post.created_at|date:"Y-m-d H:i" }}
+            </div>
+        </div>
         {% empty %}
         <p>아직 게시글이 없습니다.</p>
-    {% endfor %}
-    <a href="{% url 'post:write' %}">새 글 작성</a>
+        {% endfor %}
+    </div>
 </body>
 </html>

@@ -16,13 +16,27 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
+from post.views import register  # 회원가입 뷰 import
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('post.urls'))
+
+    # 기본 경로 접근 시 로그인 페이지로 리디렉션
+    path('', lambda request: redirect('login')),
+
+    # 게시글 관련 URL들 (post 앱)
+    path('post/', include(('post.urls', 'post'), namespace='post')),
+
+    # 로그인 / 로그아웃 / 회원가입
+    path('accounts/login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('accounts/logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+    path('accounts/register/', register, name='register'),
 ]
 
+# 개발환경에서 media 파일 처리
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

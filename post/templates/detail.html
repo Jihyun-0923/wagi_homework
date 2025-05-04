@@ -5,24 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ post.title }}</title>
     <style>
-        img {
-            max-width: 500px;  /* 최대 너비 */
-            height: auto;  /* 비율 유지 */
+        body {
+            font-family: "Noto Sans KR", sans-serif;
+            background-color: #f9f9f9;
+            padding: 30px;
+        }
+
+        .post-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 700px;
+            margin: auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .meta {
+            color: #777;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .content {
+            white-space: pre-wrap;
+            line-height: 1.6;
+            font-size: 1rem;
+            color: #444;
+        }
+
+        .images img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 20px;
+            border-radius: 6px;
             display: block;
-            margin: 20px 0;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            color: #5a2ca0;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-edit {
+            margin-right: 10px;
+            background: #4CAF50;
+            color: white;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-edit:hover {
+            background: #45a049;
         }
     </style>
 </head>
 <body>
-    <h1>{{ post.title }}</h1>
-    <p>작성자: {{ post.author }}</p>
-    <p>작성일: {{ post.created_at }}</p>
+    <div class="post-container">
+        <h1>{{ post.title }}</h1>
 
-    {% if post.image %}
-        <img src="{{ post.image.url }}" alt="게시글 이미지">
-    {% endif %}
+        <div class="meta">
+            작성자: {{ post.author }} | 작성일: {{ post.created_at }}
+        </div>
 
-    <p>{{ post.content }}</p>
-    <a href="{% url 'post:list' %}">목록으로 돌아가기</a>
+        <div class="content">{{ post.content }}</div>
+
+        {% if post.images.all %}
+        <div class="images">
+            {% for image in post.images.all %}
+                <img src="{{ image.image.url }}" alt="게시글 이미지">
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <a href="{% url 'post:list' %}">목록으로 돌아가기</a>
+
+        {% if request.user == post.author %}
+            <a href="{% url 'post:edit' post.pk %}" class="btn-edit">수정하기</a>
+        {% endif %}
+    </div>
 </body>
 </html>

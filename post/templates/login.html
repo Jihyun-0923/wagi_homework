@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인</title>
+    <style>
+        body {
+            font-family: "Noto Sans KR", sans-serif;
+            background-color: #f9f9f9;
+            padding: 30px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .errorlist {
+            color: red;
+            margin-bottom: 10px;
+            list-style: none;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <h2>로그인</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">로그인</button>
+    </form>
+    <p style="text-align: center; margin-top: 15px;">
+        계정이 없으신가요? <a href="{% url 'post:register' %}">회원가입</a>
+    </p>
+</body>
+</html>

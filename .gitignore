@@ -3,3 +3,4 @@ db.sqlite3
 media
 media\post_images
 migrations/
+__pycache__/
