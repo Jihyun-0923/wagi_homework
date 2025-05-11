@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import list, detail, write, edit, register
+from .views import list, detail, write, edit, register, toggle_like  # ✅ toggle_like 추가
 from django.contrib.auth import views as auth_views
 
 app_name = 'post'
@@ -10,9 +10,10 @@ urlpatterns = [
     path('write/', write, name='write'),                # 글 작성
     path('<int:post_id>/', detail, name='detail'),      # 게시글 상세
     path('<int:post_id>/edit/', edit, name='edit'),     # 글 수정
+    path('<int:post_id>/like/', toggle_like, name='toggle_like'),  # ✅ 좋아요 토글
 
     # 회원 관련 기능
     path('register/', register, name='register'),       # 회원가입
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),  # 로그인
-    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),        # 로그아웃
+    path('logout/', auth_views.LogoutView.as_view(next_page='post:login'), name='logout'),   # 로그아웃
 ]

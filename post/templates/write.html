@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>게시글 작성</title>
+    <title>{{ is_edit|yesno:"게시글 수정,게시글 작성" }}</title>
     <style>
         body {
             font-family: "Noto Sans KR", sans-serif;
@@ -84,10 +84,28 @@
             margin: 0;
             padding-left: 20px;
         }
+
+        .existing-images {
+            margin-top: 10px;
+        }
+
+        .existing-images label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: normal;
+        }
+
+        .existing-images img {
+            max-width: 100px;
+            height: auto;
+            vertical-align: middle;
+            border-radius: 6px;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
-    <h1>새 글 작성</h1>
+    <h1>{{ is_edit|yesno:"게시글 수정,새 글 작성" }}</h1>
 
     {% if form.errors %}
     <div class="error-box">
@@ -113,10 +131,26 @@
         <label for="{{ form.content.id_for_label }}">내용</label>
         {{ form.content }}
 
+        {% if is_edit and existing_images %}
+        <label>기존 이미지</label>
+        <div class="existing-images">
+            {% for image in existing_images %}
+                <label>
+                    <img src="{{ image.image.url }}" alt="기존 이미지">
+                    <input type="checkbox" name="delete_images" value="{{ image.id }}">
+                    삭제
+                </label>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <label for="id_images">이미지 업로드</label>
         <input type="file" name="images" id="id_images" multiple>
 
-        <button type="submit">작성</button>
+        <!-- ✅ 버튼: 무조건 출력되게 조건 제거 + 안전 처리 -->
+        <button type="submit">
+            {{ is_edit|yesno:"수정,작성" }}
+        </button>
     </form>
 
     <a href="{% url 'post:list' %}">목록으로 돌아가기</a>

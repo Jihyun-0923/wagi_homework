@@ -76,6 +76,12 @@
             margin-top: 5px;
         }
 
+        .counts {
+            margin-top: 8px;
+            color: #999;
+            font-size: 0.85rem;
+        }
+
         .auth-form {
             display: inline;
         }
@@ -109,6 +115,10 @@
             <a href="{% url 'post:detail' post.id %}">{{ post.title }}</a>
             <div class="meta">
                 작성자: {{ post.author }} | 작성일: {{ post.created_at|date:"Y-m-d H:i" }}
+            </div>
+            <!-- ✅ 댓글 수 / 좋아요 수 -->
+            <div class="counts">
+                💬 댓글: {{ post.comments.count }}개 &nbsp;&nbsp; ❤️ 좋아요: {{ post.likes.count }}개
             </div>
         </div>
         {% empty %}

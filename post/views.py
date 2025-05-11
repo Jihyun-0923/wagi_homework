@@ -1,18 +1,47 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from .models import Post, PostImage
-from .forms import PostForm, RegisterForm
+from .models import Post, PostImage, Comment
+from .forms import PostForm, RegisterForm, CommentForm
 
 # 게시글 목록
 def list(request):
     posts = Post.objects.all().order_by('-created_at')
     return render(request, 'list.html', {'posts': posts})
 
-# 게시글 상세
+# 게시글 상세 (댓글 기능 포함)
 def detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    return render(request, 'detail.html', {'post': post})
+    comments = post.comments.all().order_by('-created_at')
+
+    if request.method == "POST":
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid() and request.user.is_authenticated:
+            comment = comment_form.save(commit=False)
+            comment.post = post
+            comment.author = request.user
+            comment.save()
+            return redirect('post:detail', post_id=post.id)
+    else:
+        comment_form = CommentForm()
+
+    return render(request, 'detail.html', {
+        'post': post,
+        'comments': comments,
+        'comment_form': comment_form,
+    })
+
+# ✅ 좋아요 토글 기능 (로그인 필요)
+@login_required
+def toggle_like(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    if request.user in post.likes.all():
+        post.likes.remove(request.user)
+    else:
+        post.likes.add(request.user)
+
+    return redirect('post:detail', post_id=post.id)
 
 # 게시글 작성 (로그인 필요)
 @login_required
@@ -21,7 +50,7 @@ def write(request):
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
-            post.author = request.user  # 로그인한 사용자로 작성자 설정
+            post.author = request.user
             post.save()
 
             # 다중 이미지 저장
@@ -33,7 +62,7 @@ def write(request):
         form = PostForm()
     return render(request, 'write.html', {'form': form})
 
-# 게시글 수정 (로그인 + 본인만 가능)
+# 게시글 수정 (로그인 + 본인만 가능 + 이미지 삭제/추가)
 @login_required
 def edit(request, post_id):
     post = get_object_or_404(Post, id=post_id)
@@ -43,16 +72,37 @@ def edit(request, post_id):
         return redirect('post:detail', post_id=post.id)
 
     if request.method == "POST":
-        form = PostForm(request.POST, instance=post)
+        form = PostForm(request.POST, request.FILES, instance=post)
+
         if form.is_valid():
             updated_post = form.save(commit=False)
-            updated_post.author = post.author  # 작성자 변경 방지
+            updated_post.author = post.author  # 작성자 유지
             updated_post.save()
+
+            # ✅ 선택된 이미지 삭제
+            delete_ids = request.POST.getlist('delete_images')
+            for image_id in delete_ids:
+                image = PostImage.objects.filter(id=image_id, post=post).first()
+                if image:
+                    image.delete()
+
+            # ✅ 새 이미지 추가
+            for f in request.FILES.getlist('images'):
+                PostImage.objects.create(post=post, image=f)
+
             return redirect('post:detail', post_id=post.id)
     else:
         form = PostForm(instance=post)
 
-    return render(request, 'write.html', {'form': form, 'is_edit': True})
+    # 기존 이미지들도 템플릿에 전달
+    existing_images = post.images.all()
+
+    return render(request, 'write.html', {
+        'form': form,
+        'is_edit': True,
+        'existing_images': existing_images,
+        'post': post,
+    })
 
 # 회원가입 → 가입 후 로그인 페이지로 이동
 def register(request):

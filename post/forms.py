@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post
+from .models import Post, Comment
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['title', 'content']  # ❌ author 제거 (자동 할당되기 때문)
+        fields = ['title', 'content']  # author는 request.user로 자동 설정
 
 # ✅ 회원가입 폼
 class RegisterForm(UserCreationForm):
@@ -16,3 +16,9 @@ class RegisterForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
+
+# ✅ 댓글 작성용 폼 추가
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content']
