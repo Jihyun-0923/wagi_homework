@@ -47,8 +47,35 @@
 
         .action-bar {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            padding: 8px 12px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-right: 8px;
+        }
+
+        .search-btn {
+            background: #2196F3;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .search-btn:hover {
+            background: #1976D2;
         }
 
         .post-item {
@@ -93,22 +120,28 @@
             <h1>게시글 목록</h1>
             <div>
                 {% if user.is_authenticated %}
-                    <form method="post" action="{% url 'logout' %}" class="auth-form">
+                    <form method="post" action="{% url 'user:logout' %}" class="auth-form">
                         {% csrf_token %}
                         <button type="submit" class="btn-auth">로그아웃</button>
                     </form>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn-auth">로그인</a>
-                    <a href="{% url 'register' %}" class="btn-auth">회원가입</a>
+                    <a href="{% url 'user:login' %}" class="btn-auth">로그인</a>
+                    <a href="{% url 'user:register' %}" class="btn-auth">회원가입</a>
                 {% endif %}
             </div>
         </div>
 
-        {% if user.is_authenticated %}
         <div class="action-bar">
-            <a href="{% url 'post:write' %}" class="btn-new">+ 새 글 작성</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'post:write' %}" class="btn-new">+ 새 글 작성</a>
+            {% endif %}
+            
+            <!-- ✅ 검색 폼 추가 -->
+            <form method="get" action="{% url 'post:search' %}" class="search-bar">
+                <input type="text" name="q" class="search-input" placeholder="검색어를 입력하세요" value="{{ request.GET.q|default:'' }}" required>
+                <button type="submit" class="search-btn">검색</button>
+            </form>
         </div>
-        {% endif %}
 
         {% for post in posts %}
         <div class="post-item">
@@ -116,7 +149,6 @@
             <div class="meta">
                 작성자: {{ post.author }} | 작성일: {{ post.created_at|date:"Y-m-d H:i" }}
             </div>
-            <!-- ✅ 댓글 수 / 좋아요 수 -->
             <div class="counts">
                 💬 댓글: {{ post.comments.count }}개 &nbsp;&nbsp; ❤️ 좋아요: {{ post.likes.count }}개
             </div>

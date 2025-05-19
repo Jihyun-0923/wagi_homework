@@ -148,7 +148,7 @@
                 {% endif %}
             </form>
         {% else %}
-            <p style="margin-top: 20px;"><a href="{% url 'post:login' %}">로그인</a> 후 좋아요를 누를 수 있습니다.</p>
+            <p style="margin-top: 20px;"><a href="{% url 'user:login' %}">로그인</a> 후 좋아요를 누를 수 있습니다.</p>
         {% endif %}
 
         <a href="{% url 'post:list' %}">목록으로 돌아가기</a>
@@ -176,7 +176,7 @@
                     <button type="submit">댓글 달기</button>
                 </form>
             {% else %}
-                <p><a href="{% url 'post:login' %}">로그인</a> 후 댓글을 작성할 수 있습니다.</p>
+                <p><a href="{% url 'user:login' %}">로그인</a> 후 댓글을 작성할 수 있습니다.</p>
             {% endif %}
         </div>
     </div>

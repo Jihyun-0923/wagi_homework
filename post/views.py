@@ -1,8 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from .models import Post, PostImage, Comment
-from .forms import PostForm, RegisterForm, CommentForm
+from .forms import PostForm, CommentForm
 
 # 게시글 목록
 def list(request):
@@ -31,7 +30,7 @@ def detail(request, post_id):
         'comment_form': comment_form,
     })
 
-# ✅ 좋아요 토글 기능 (로그인 필요)
+# 좋아요 토글 (로그인 필요)
 @login_required
 def toggle_like(request, post_id):
     post = get_object_or_404(Post, id=post_id)
@@ -67,7 +66,6 @@ def write(request):
 def edit(request, post_id):
     post = get_object_or_404(Post, id=post_id)
 
-    # 본인만 수정 가능
     if request.user != post.author:
         return redirect('post:detail', post_id=post.id)
 
@@ -79,14 +77,14 @@ def edit(request, post_id):
             updated_post.author = post.author  # 작성자 유지
             updated_post.save()
 
-            # ✅ 선택된 이미지 삭제
+            # 선택된 이미지 삭제
             delete_ids = request.POST.getlist('delete_images')
             for image_id in delete_ids:
                 image = PostImage.objects.filter(id=image_id, post=post).first()
                 if image:
                     image.delete()
 
-            # ✅ 새 이미지 추가
+            # 새 이미지 추가
             for f in request.FILES.getlist('images'):
                 PostImage.objects.create(post=post, image=f)
 
@@ -94,7 +92,6 @@ def edit(request, post_id):
     else:
         form = PostForm(instance=post)
 
-    # 기존 이미지들도 템플릿에 전달
     existing_images = post.images.all()
 
     return render(request, 'write.html', {
@@ -104,13 +101,8 @@ def edit(request, post_id):
         'post': post,
     })
 
-# 회원가입 → 가입 후 로그인 페이지로 이동
-def register(request):
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            form.save()  # 사용자 생성
-            return redirect('login')  # 로그인 페이지로 이동
-    else:
-        form = RegisterForm()
-    return render(request, 'register.html', {'form': form})
+# 검색 기능
+def search(request):
+    query = request.GET.get('q')
+    results = Post.objects.filter(title__icontains=query) if query else []
+    return render(request, 'search_result.html', {'results': results, 'query': query})

@@ -19,7 +19,10 @@ __pycache__
 media/
 media/post_images/
 
-# 기타
+# 로그 및 기타
 *.log
 *.pot
 local_settings.py
+
+# 환경 변수 파일
+.env
