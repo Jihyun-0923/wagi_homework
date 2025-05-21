@@ -15,6 +15,10 @@ __pycache__/
 **/migrations/
 !**/migrations/__init__.py
 
+# 템플릿 태그 필터
+**/templatetags/
+!**/templatetags/__init__.py
+
 # 미디어 업로드 파일
 media/
 media/post_images/

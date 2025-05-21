@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from .models import Post, PostImage, Comment
 from .forms import PostForm, CommentForm
 
@@ -101,8 +102,28 @@ def edit(request, post_id):
         'post': post,
     })
 
-# 검색 기능
+# ✅ 검색 기능 (공백/쉼표 기준 분리, 순서 무관하게 키워드 모두 포함)
 def search(request):
-    query = request.GET.get('q')
-    results = Post.objects.filter(title__icontains=query) if query else []
-    return render(request, 'search_result.html', {'results': results, 'query': query})
+    query = request.GET.get('q', '')
+    search_type = request.GET.get('search_type', 'all')  # 'title', 'content', 'all'
+    results = Post.objects.none()  # 빈 결과로 시작
+
+    if query:
+        keywords = [word.strip() for word in query.replace(',', ' ').split()]
+        q_object = Q()
+
+        for word in keywords:
+            if search_type == 'title':
+                q_object |= Q(title__icontains=word)
+            elif search_type == 'content':
+                q_object |= Q(content__icontains=word)
+            else:  # 'all' 또는 예외 처리
+                q_object |= Q(title__icontains=word) | Q(content__icontains=word)
+
+        results = Post.objects.filter(q_object).distinct()
+
+    return render(request, 'search_result.html', {
+        'results': results,
+        'query': query,
+        'search_type': search_type
+    })

@@ -1,3 +1,4 @@
+{% load highlight %}
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -43,7 +44,7 @@
             margin-bottom: 20px;
         }
 
-        .search-input {
+        .search-select, .search-input {
             padding: 8px 12px;
             font-size: 1rem;
             border: 1px solid #ccc;
@@ -89,6 +90,17 @@
             margin-top: 5px;
         }
 
+        .snippet {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            color: #444;
+        }
+
+        mark {
+            background-color: yellow;
+            font-weight: bold;
+        }
+
         .counts {
             margin-top: 8px;
             color: #999;
@@ -103,10 +115,15 @@
 </head>
 <body>
     <div class="results-container">
-        <h1>"{{ query }}" 검색 결과</h1>
+        <h1>"{{ query }}" 검색 결과 (총 {{ results|length }}건)</h1>
 
         <div class="search-bar">
             <form method="get" action="{% url 'post:search' %}">
+                <select name="search_type" class="search-select">
+                    <option value="all" {% if search_type == "all" or not search_type %}selected{% endif %}>전체</option>
+                    <option value="title" {% if search_type == "title" %}selected{% endif %}>제목</option>
+                    <option value="content" {% if search_type == "content" %}selected{% endif %}>내용</option>
+                </select>
                 <input type="text" name="q" class="search-input" placeholder="검색어를 입력하세요" value="{{ query }}" required>
                 <button type="submit" class="search-btn">검색</button>
             </form>
@@ -115,9 +132,22 @@
         {% if results %}
             {% for post in results %}
             <div class="post-item">
-                <a href="{% url 'post:detail' post.id %}">{{ post.title }}</a>
+                <a href="{% url 'post:detail' post.id %}">
+                    {% if search_type == "title" or search_type == "all" %}
+                        {{ post.title|highlight:query|safe }}
+                    {% else %}
+                        {{ post.title }}
+                    {% endif %}
+                </a>
                 <div class="meta">
                     작성자: {{ post.author }} | 작성일: {{ post.created_at|date:"Y-m-d H:i" }}
+                </div>
+                <div class="snippet">
+                    {% if search_type == "content" or search_type == "all" %}
+                        {{ post.content|truncatechars:200|highlight:query|safe }}
+                    {% else %}
+                        {{ post.content|truncatechars:200 }}
+                    {% endif %}
                 </div>
                 <div class="counts">
                     💬 댓글: {{ post.comments.count }}개 &nbsp;&nbsp; ❤️ 좋아요: {{ post.likes.count }}개
